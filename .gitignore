@@ -1,0 +1,17 @@
+.build/
+build/
+*.exe
+*.dll
+*.node
+*.asar
+*.db
+*.sqlite
+*.sqlite3
+*.log
+__pycache__/
+*.pyc
+.DS_Store
+vendor/
+state/
+wine-prefix/
+content/

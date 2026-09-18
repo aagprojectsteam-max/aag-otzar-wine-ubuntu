@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Otzar HaHochma
+Comment=Otzar HaHochma through the AAG Wine/Xwayland runtime
+Exec=@@FINAL_ROOT@@/launch/aag-otzar-wine-final
+Icon=aag-otzar-wine
+Terminal=false
+Categories=Office;Education;
+StartupNotify=true
+StartupWMClass=otzar.exe

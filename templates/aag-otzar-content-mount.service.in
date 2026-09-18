@@ -1,0 +1,9 @@
+[Unit]
+Description=AAG Otzar independent read-only content mount
+After=local-fs.target
+ConditionPathExists=@@DEVICE_BY_UUID@@
+
+[Service]
+Type=oneshot
+ExecStart=@@FINAL_ROOT@@/mount/aag-otzar-content-mount
+RemainAfterExit=yes

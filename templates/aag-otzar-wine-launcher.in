@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+FINAL="@@FINAL_ROOT@@"
+WINE="$FINAL/wine-devel/bin/wine"
+RUNTIME="$FINAL/runtime/v3.2.0/run-session.py"
+TARGET="@@CONTENT_TARGET@@"
+KINGSTON_VENDOR="@@KINGSTON_VENDOR@@"
+KINGSTON_PRODUCT="@@KINGSTON_PRODUCT@@"
+
+notify_error() {
+  command -v notify-send >/dev/null 2>&1 &&
+    notify-send "Otzar HaHochma" "$1" --urgency=critical || true
+}
+
+raise_outer_window() {
+  local runtime="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+  XDG_RUNTIME_DIR="$runtime" DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=$runtime/bus}" \
+    gdbus call --session --dest org.gnome.Shell \
+      --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+      --method org.gnome.Shell.Extensions.RunOrRaise.Call ',,,Xwayland on :201' >/dev/null 2>&1
+}
+
+app_running() { pgrep -f 'C:\\OtzarApp.*otzar\.exe --touch-events=enabled' >/dev/null 2>&1; }
+kingston_ready() {
+  local dev
+  for dev in /sys/bus/usb/devices/*; do
+    [ -r "$dev/idVendor" ] && [ -r "$dev/idProduct" ] || continue
+    [ "$(cat "$dev/idVendor")" = "$KINGSTON_VENDOR" ] || continue
+    [ "$(cat "$dev/idProduct")" = "$KINGSTON_PRODUCT" ] || continue
+    [ ! -r "$dev/authorized" ] || [ "$(cat "$dev/authorized")" = 1 ] || continue
+    return 0
+  done
+  return 1
+}
+
+if app_running; then
+  raise_outer_window && exit 0
+  notify_error "Application is running but its window could not be raised."
+  exit 1
+fi
+
+for _ in $(seq 1 50); do kingston_ready && break; sleep .2; done
+kingston_ready || { notify_error "Required Kingston device is not ready."; exit 1; }
+
+[ -x "$WINE" ] && [ "$("$WINE" --version 2>/dev/null)" = wine-11.17 ] || {
+  notify_error "The accepted Wine 11.17 runtime is unavailable."; exit 1;
+}
+
+if [ ! -d "$TARGET" ]; then
+  pkexec systemctl start aag-otzar-content-mount.service || {
+    notify_error "The content mount could not be prepared."; exit 1;
+  }
+fi
+[ -d "$TARGET" ] || { notify_error "The content source is unavailable."; exit 1; }
+
+python3 "$RUNTIME" &
+session_pid=$!
+for _ in $(seq 1 120); do
+  kill -0 "$session_pid" 2>/dev/null || { wait "$session_pid"; exit $?; }
+  if app_running; then raise_outer_window || true; break; fi
+  sleep .2
+done
+wait "$session_pid"

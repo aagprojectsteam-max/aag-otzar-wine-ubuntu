@@ -38,7 +38,7 @@ print(
     }),
     flush=True,
 );control=state/'control';control.mkdir(exist_ok=True)
-runtime=Path(os.environ.get('XDG_RUNTIME_DIR',f'/run/user/{os.getuid()}'));runtime.mkdir(parents=True,exist_ok=True);runtime.chmod(0o700)
+runtime=Path('/run/user/1000');runtime.mkdir(parents=True,exist_ok=True);runtime.chmod(0o700)
 app='C:\\OtzarApp\\OtzarLocal\\launcher\\bin\\x64\\app\\otzar.exe'
 
 graphics_file = state/'graphics-flags.json'
@@ -116,7 +116,7 @@ try:
         scale_flags=[
             '--touch-events=enabled',
             '--force-device-scale-factor=1.5',
-            '--in-process-gpu', '--disable-gpu-compositing']
+            '--in-process-gpu']
         child=subprocess.Popen([wine,app,*scale_flags],stdout=stream,stderr=subprocess.STDOUT,
           cwd='/state/prefix/drive_c/OtzarApp/OtzarLocal/launcher/bin/x64/app')
 

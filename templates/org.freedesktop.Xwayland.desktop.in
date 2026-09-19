@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Otzar HaHochma
+Comment=Otzar HaHochma nested Xwayland host
+Exec=@@HOME@@/.local/bin/aag-otzar-wine
+Icon=aag-otzar-wine
+Terminal=false
+Categories=Office;Education;
+StartupNotify=true
+NoDisplay=false

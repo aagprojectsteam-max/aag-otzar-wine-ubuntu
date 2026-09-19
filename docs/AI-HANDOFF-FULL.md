@@ -165,7 +165,6 @@ Use:
 --touch-events=enabled
 --force-device-scale-factor=1.5
 --in-process-gpu
---disable-gpu-compositing
 
 Do not lower the Xwayland physical resolution merely to make the UI smaller. The accepted result keeps 1920x1200 physical and changes only Chromium's scale factor.
 
@@ -311,3 +310,13 @@ Do not delete the last known-good final package during burn-in.
 The project is complete only when the user's own installation launches from Apps, all acceptance tests pass, the application state is in DATA, content stays read-only, and no production path depends on obsolete experiment trees.
 
 Until then, do not optimize for cleanup at the expense of rollback safety.
+
+## v3.3 burn-in additions
+
+- Prefer a DATA hierarchy such as `/mnt/data/WineApps/<application>/` when several Wine applications coexist.
+- On cold start, verify the user's required licensing USB device is present and authorized before launching Wine. The reference Kingston device is identified by VID:PID 0951:1666; do not hard-code a serial number in public automation.
+- The nested rootful Xwayland surface is tracked by GNOME as `org.freedesktop.Xwayland.desktop`. A user-local override of that desktop ID can supply the application name/icon and make the nested host pinnable in the Dock.
+- Fullscreen settings may be scoped to a settings object/tab. Inject `fullscreen-global-v1.js` so the five `full_screen_*` values are present for each loaded settings object and fullscreen layout is reapplied after a book/tab rebuild.
+- Keep `LIBGL_ALWAYS_SOFTWARE=1` and `--in-process-gpu`, but do not use `--disable-gpu-compositing` in the accepted v3.3 runtime.
+- Physical mouse-wheel A/B testing showed zero frames above 20 ms with Chromium compositing enabled versus nine approximately 166 ms stalls with `--disable-gpu-compositing` during the comparison run.
+- For vendor application updates, follow `docs/UPDATING-THE-WINDOWS-APP.md`; never update the only known-good production tree in place.

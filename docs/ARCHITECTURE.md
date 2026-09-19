@@ -40,7 +40,6 @@ The accepted Electron launch flags are:
 - --touch-events=enabled
 - --force-device-scale-factor=1.5
 - --in-process-gpu
-- --disable-gpu-compositing
 
 The nested Xwayland physical size remains 1920x1200. At scale 1.5 Chromium reports a logical viewport near 1280x800 while retaining the full physical raster.
 

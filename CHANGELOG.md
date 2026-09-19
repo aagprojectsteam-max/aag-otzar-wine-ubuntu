@@ -1,5 +1,16 @@
 # Changelog
 
+## v3.3.0-burn-in — 2026-09-20
+
+- Production tree relocated under `/mnt/data/WineApps/Otzar-HaHochma`.
+- GNOME Apps launcher now restores/raises an already-running nested Xwayland window.
+- Kingston 0951:1666 readiness is checked before a cold application start.
+- Added a local `org.freedesktop.Xwayland.desktop` integration pattern so the nested host can use the application name/icon and be pinned to the Dock.
+- Restored `autoHeb=0` after migration so host Hebrew/English switching remains authoritative.
+- Fullscreen preferences are enforced for every settings object/tab; fullscreen survives book changes.
+- Enabled Chromium compositing while retaining `LIBGL_ALWAYS_SOFTWARE=1`; physical wheel testing removed recurring ~166 ms frame stalls seen with `--disable-gpu-compositing`.
+- Retained scale 1.5, touch, input filter, popup fixes, window controls, and read-only content architecture.
+
 ## v3.2.0-burn-in — 2026-09-18
 
 - Final DATA-first production layout.

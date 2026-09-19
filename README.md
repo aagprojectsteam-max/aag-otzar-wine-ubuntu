@@ -7,7 +7,7 @@ Reference implementation and engineering handoff for running a user-owned Window
 - Reference platform: Ubuntu 26.04, GNOME Wayland.
 - Tested Wine: wine-devel 11.17.
 - Final UI scale: 1.5 on a 1920x1200 nested Xwayland display.
-- Final reference runtime: v3.2.0 burn-in.
+- Final reference runtime: v3.3.0 burn-in.
 - This repository contains only AAG-authored glue code, diagnostics, patches, templates, and documentation.
 
 ## What is not included
@@ -28,7 +28,7 @@ This repository does not contain the commercial application, books, databases, l
 
 ## Start here
 
-Read docs/AI-HANDOFF-FULL.md if you want an AI agent to reproduce the setup from a clean machine. Read docs/ARCHITECTURE.md for the component model and docs/FAILURE-HISTORY.md before trying alternative fixes.
+Read docs/AI-HANDOFF-FULL.md if you want an AI agent to reproduce the setup from a clean machine. Read docs/ARCHITECTURE.md for the component model, docs/FAILURE-HISTORY.md before trying alternative fixes, and docs/UPDATING-THE-WINDOWS-APP.md before applying a vendor update.
 
 ## Public source layout
 
@@ -39,6 +39,7 @@ Read docs/AI-HANDOFF-FULL.md if you want an AI agent to reproduce the setup from
 - src/touch-focus.sh — touch-to-focus helper.
 - src/scale15-phase-snap.js — physical-pixel-aligned splitter motion.
 - src/popup-fix-v2.js — stable HTML text context menu and outside-click dismissal.
+- src/fullscreen-global-v1.js — fullscreen settings/layout persistence across book/tab changes.
 - src/window-control-bridge.js — Electron window-control interception.
 - src/tab-fallback.js — production tab fallback.
 - scripts/build-input-filter.sh — reproducible MinGW build.

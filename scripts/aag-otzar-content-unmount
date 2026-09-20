@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+export LC_ALL=C
+UUID="@@CONTENT_UUID@@"
+TARGET="@@CONTENT_TARGET_ROOT@@"
+EXPECTED_BACKING="@@CONTENT_DEVICE@@"
+log(){ printf 'AAG_OTZAR_UNMOUNT: %s\n' "$*"; }
+fail(){ log "ERROR=$*"; exit 1; }
+mountpoint -q "$TARGET" || { log "STATUS=ALREADY_DOWN"; exit 0; }
+SRC="$(findmnt -rn -o SOURCE -T "$TARGET")"
+MUUID="$(findmnt -rn -o UUID -T "$TARGET")"
+OPTS="$(findmnt -rn -o OPTIONS -T "$TARGET")"
+[ "$MUUID" = "$UUID" ] || fail "WRONG_UUID:$MUUID"
+case "$SRC" in /dev/loop*) ;; *) fail "UNEXPECTED_SOURCE:$SRC";; esac
+case ",$OPTS," in *,ro,*) ;; *) fail "MOUNT_NOT_READONLY:$OPTS";; esac
+BACKING="$(losetup -n -O BACK-FILE "$SRC" | head -1)"
+[ "$BACKING" = "$EXPECTED_BACKING" ] || fail "WRONG_BACKING:$BACKING"
+pgrep -f 'C:\\OtzarApp.*otzar\.exe --touch-events=enabled' >/dev/null 2>&1 && fail "OTZAR_STILL_RUNNING"
+umount "$TARGET"
+mountpoint -q "$TARGET" && fail "UNMOUNT_FAILED"
+if losetup "$SRC" >/dev/null 2>&1; then
+  [ "$(losetup -n -O BACK-FILE "$SRC" | head -1)" = "$EXPECTED_BACKING" ] || fail "LOOP_BACKING_CHANGED"
+  losetup -d "$SRC"
+fi
+log "STATUS=DOWN"

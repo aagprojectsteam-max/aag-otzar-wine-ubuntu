@@ -5,6 +5,7 @@
 - Production tree relocated under `/mnt/data/WineApps/Otzar-HaHochma`.
 - GNOME Apps launcher now restores/raises an already-running nested Xwayland window.
 - Kingston 0951:1666 readiness is checked before a cold application start.
+- Added an owned mount lifecycle: a mount created for Otzar is verified, read-only, and automatically unmounted/detached after the application stack exits.
 - Added a local `org.freedesktop.Xwayland.desktop` integration pattern so the nested host can use the application name/icon and be pinned to the Dock.
 - Restored `autoHeb=0` after migration so host Hebrew/English switching remains authoritative.
 - Fullscreen preferences are enforced for every settings object/tab; fullscreen survives book changes.

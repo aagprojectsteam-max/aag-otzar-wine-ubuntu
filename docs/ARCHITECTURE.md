@@ -82,3 +82,6 @@ A small production fallback preserves the accepted tab behavior when the origina
 ## 12. Direct DATA launch
 
 The GNOME desktop entry points directly to the launcher inside DATA. HOME contains only desktop-integration files such as the .desktop file and icons. The active runtime does not rely on the old HOME Wine prefix or legacy symlinks.
+
+### Owned content lifecycle
+The Apps launcher owns a content mount only when it created that mount for the current cold start. On launcher exit it invokes the guarded unmount helper. The helper refuses teardown while Otzar is alive and re-verifies UUID, read-only mode, loop source and physical backing before unmounting and detaching the exact loop. A mount that pre-existed the launcher is not claimed or automatically torn down.

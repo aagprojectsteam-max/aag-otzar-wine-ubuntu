@@ -47,3 +47,20 @@ Only after the regression gate passes:
 5. remove the previous version only after the new burn-in is accepted.
 
 Never let an application update silently overwrite the only known-good production package.
+
+## One-line handoff for a future AI session
+
+When a new vendor version is available, give the AI this repository and say:
+
+> Update my installed Otzar Windows application using `docs/UPDATING-THE-WINDOWS-APP.md`. Preserve the current accepted production tree as rollback, build and test a separate candidate, reapply only guarded compatibility patches, run the complete regression gate, and promote the candidate only if every required test passes.
+
+The AI should also read `docs/AI-HANDOFF-FULL.md`, `docs/ARCHITECTURE.md`, `docs/FAILURE-HISTORY.md`, and the latest `CHANGELOG.md` before changing production.
+
+## Current accepted checkpoint
+
+- Release line: `v3.3.0-burn-in`.
+- DATA layout: `/mnt/data/WineApps/Otzar-HaHochma/`.
+- Production uses Wine 11.17, scale 1.5, `--in-process-gpu`, software GL, and Chromium compositing.
+- The Apps launcher owns the Kingston/content lifecycle only when it created the mount: readiness check -> verified read-only loop/mount -> application -> verified unmount/loop detach on exit.
+- Preserve Dock/Apps integration, global fullscreen persistence, language/Backspace repair, popup fixes, touch behavior, and splitter-shimmer fixes.
+- Never update the only accepted production tree in place.

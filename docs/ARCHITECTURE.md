@@ -55,6 +55,8 @@ The bridge combines Linux EVIOCGKEY state and XQueryKeymap modifier state. It ne
 
 Touch events are enabled natively. The touch-focus helper watches TouchBegin and focuses the Otzar top-level window so typing after touch remains reliable.
 
+Internal book fullscreen uses an AAG touch controller because the application's stock offline scroll path schedules page reconciliation after only 15 ms. During kinetic motion that can repeatedly mutate the virtual page window. The controller coalesces finger movement to requestAnimationFrame, keeps a bounded warm pool of seven page slots around the current position, and performs one authoritative page-state reconciliation after visual motion has settled. This prevents page-boundary canvas replacement/redraw from landing on the visible scrolling frames while keeping the application's page state authoritative after the gesture.
+
 ## 8. Window controls
 
 Maximize and minimize are intercepted at the Electron IPC layer.

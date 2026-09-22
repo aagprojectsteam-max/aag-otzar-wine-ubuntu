@@ -40,6 +40,7 @@ def patch_index(src: Path, dst: Path) -> None:
         ("scale15-phase-snap.js", "__AAG_SCALE15_DRAG_SNAP_PHASE__"),
         ("popup-fix-v2.js", "__AAG_POPUP_FIX_V2__"),
         ("fullscreen-global-v1.js", "__AAG_FULLSCREEN_GLOBAL_V1__"),
+        ("touch-scroll-v3.js", "AAG_TOUCH_SCROLL_V3_20260922"),
     ]:
         if marker not in text:
             blocks.append("<script>\n" + (SRC / name).read_text() + "</script>\n")

@@ -33,6 +33,7 @@ Side components:
 - input-filter.exe runs inside the same Wine prefix;
 - bridge.py certifies host modifier state using EVIOCGKEY + XQueryKeymap;
 - touch-focus.sh keeps touch-to-typing focus reliable;
+- touch-scroll-v3.js provides fullscreen finger scrolling with a bounded warm page pool and settled reconciliation;
 - window-control bridge redirects maximize/minimize;
 - scale patch aligns splitter motion to physical pixels;
 - popup patch replaces unstable native text menus and repairs outside-click dismissal.

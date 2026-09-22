@@ -1,3 +1,12 @@
+## Unreleased — 2026-09-22
+
+- Reworked physical touch scrolling for internal book fullscreen.
+- Added a bounded seven-page warm pool so crossing a page boundary reuses already-rendered page canvases instead of replacing and redrawing the visible page during the gesture.
+- Deferred page-state reconciliation until the visual scroll has settled; one authoritative reconciliation remains at gesture end.
+- Removed stale release velocity after a held drag, prevented pointer-cancel from starting inertia, locked the dominant gesture axis, and stopped unrelated focus changes from cancelling touch.
+- Fullscreen boundary benchmark improved from a measured ~66.7 ms worst frame with page redraw to ~16.7 ms with zero image redraw calls in the tested touch cases.
+- Preserved mouse-wheel scrolling, page navigation, scale 1.5, Chromium compositing, read-only content, and the existing launcher lifecycle.
+
 # Changelog
 
 ## Unreleased — 2026-09-22

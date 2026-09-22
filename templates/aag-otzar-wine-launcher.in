@@ -7,58 +7,150 @@ RUNTIME="$FINAL/runtime/v3.2.0/run-session.py"
 TARGET="@@CONTENT_TARGET@@"
 KINGSTON_VENDOR="@@KINGSTON_VENDOR@@"
 KINGSTON_PRODUCT="@@KINGSTON_PRODUCT@@"
+MOUNT_SERVICE="aag-otzar-content-mount.service"
+UNMOUNT_HELPER="/mnt/data/WineApps/Otzar-HaHochma/mount/helper/aag-otzar-content-unmount"
+OWNED_MOUNT=0
+OWNED_KINGSTON=0
 
 notify_error() {
   command -v notify-send >/dev/null 2>&1 &&
-    notify-send "Otzar HaHochma" "$1" --urgency=critical || true
+    notify-send "אוצר החכמה" "$1" --urgency=critical || true
 }
 
 raise_outer_window() {
-  local runtime="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
-  XDG_RUNTIME_DIR="$runtime" DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=$runtime/bus}" \
-    gdbus call --session --dest org.gnome.Shell \
-      --object-path /org/gnome/Shell/Extensions/RunOrRaise \
-      --method org.gnome.Shell.Extensions.RunOrRaise.Call ',,,Xwayland on :201' >/dev/null 2>&1
+  local uid runtime bus
+  uid="$(id -u)"
+  runtime="${XDG_RUNTIME_DIR:-/run/user/$uid}"
+  bus="${DBUS_SESSION_BUS_ADDRESS:-unix:path=$runtime/bus}"
+
+  XDG_RUNTIME_DIR="$runtime" \
+  DBUS_SESSION_BUS_ADDRESS="$bus" \
+  /usr/bin/gdbus call \
+    --session \
+    --dest org.gnome.Shell \
+    --object-path /org/gnome/Shell/Extensions/RunOrRaise \
+    --method org.gnome.Shell.Extensions.RunOrRaise.Call \
+    ',,,Xwayland on :201' \
+    >/dev/null 2>&1
 }
 
-app_running() { pgrep -f 'C:\\OtzarApp.*otzar\.exe --touch-events=enabled' >/dev/null 2>&1; }
+app_running() {
+  pgrep -f 'C:\\OtzarApp.*otzar\.exe --touch-events=enabled' >/dev/null 2>&1
+}
+
 kingston_ready() {
   local dev
   for dev in /sys/bus/usb/devices/*; do
-    [ -r "$dev/idVendor" ] && [ -r "$dev/idProduct" ] || continue
-    [ "$(cat "$dev/idVendor")" = "$KINGSTON_VENDOR" ] || continue
-    [ "$(cat "$dev/idProduct")" = "$KINGSTON_PRODUCT" ] || continue
-    [ ! -r "$dev/authorized" ] || [ "$(cat "$dev/authorized")" = 1 ] || continue
+    [ -r "$dev/idVendor" ] || continue
+    [ -r "$dev/idProduct" ] || continue
+    [ "$(cat "$dev/idVendor" 2>/dev/null)" = "$KINGSTON_VENDOR" ] || continue
+    [ "$(cat "$dev/idProduct" 2>/dev/null)" = "$KINGSTON_PRODUCT" ] || continue
+    [ ! -r "$dev/authorized" ] || [ "$(cat "$dev/authorized" 2>/dev/null)" = "1" ] || continue
     return 0
   done
   return 1
 }
 
+wait_for_kingston() {
+  for _ in $(seq 1 50); do
+    kingston_ready && return 0
+    sleep 0.2
+  done
+  return 1
+}
+
+cleanup_owned_mount() {
+  local rc=$?
+  trap - EXIT INT TERM HUP
+
+  # Both system services now own their privileged teardown through ExecStop.
+  # The launcher only asks systemd to stop units it started itself.
+  if [ "$OWNED_MOUNT" = 1 ]; then
+    /usr/bin/systemctl stop "$MOUNT_SERVICE" >/dev/null 2>&1 ||
+      notify_error "אוצר נסגר, אך דיסק התוכן לא שוחרר אוטומטית."
+  fi
+
+  if [ "$OWNED_KINGSTON" = 1 ]; then
+    /usr/bin/systemctl stop aag-usbclone-kingston.service >/dev/null 2>&1 ||
+      notify_error "אוצר נסגר, אך Kingston USB Clone לא נעצר אוטומטית."
+  fi
+
+  exit "$rc"
+}
+
+trap cleanup_owned_mount EXIT INT TERM HUP
+
 if app_running; then
-  raise_outer_window && exit 0
-  notify_error "Application is running but its window could not be raised."
+  for _ in $(seq 1 20); do
+    if raise_outer_window; then
+      exit 0
+    fi
+    sleep 0.15
+  done
+  notify_error "התוכנה פועלת, אך לא ניתן היה להביא את החלון לקדמת המסך."
   exit 1
 fi
 
-for _ in $(seq 1 50); do kingston_ready && break; sleep .2; done
-kingston_ready || { notify_error "Required Kingston device is not ready."; exit 1; }
+# Serialize full lifecycle.  A quick relaunch can arrive while the previous
+# instance is still tearing down mount/USB/input-sync; wait for that cleanup
+# to finish instead of colliding with it.
+exec 9>/run/user/$(id -u)/aag-otzar-wine-lifecycle.lock
+flock 9
 
-[ -x "$WINE" ] && [ "$("$WINE" --version 2>/dev/null)" = wine-11.17 ] || {
-  notify_error "The accepted Wine 11.17 runtime is unavailable."; exit 1;
-}
+# Re-check after waiting: another invocation may have started Otzar first.
+if app_running; then
+  raise_outer_window || true
+  exit 0
+fi
+
+# The Dock launcher owns the complete startup chain.  If the emulated
+# Kingston is not already present, bring up the USB Clone service first.
+if ! kingston_ready; then
+  if ! /usr/bin/systemctl start aag-usbclone-kingston.service; then
+    notify_error "לא ניתן להפעיל את Kingston USB Clone."
+    exit 1
+  fi
+  OWNED_KINGSTON=1
+fi
+
+if ! wait_for_kingston; then
+  notify_error "Kingston USB Clone הופעל, אך ההתקן עדיין לא מוכן."
+  exit 1
+fi
+
+if [ ! -x "$WINE" ] || [ "$("$WINE" --version 2>/dev/null)" != "wine-11.17" ]; then
+  notify_error "Wine 11.17 הסופי אינו זמין ב-DATA."
+  exit 1
+fi
 
 if [ ! -d "$TARGET" ]; then
-  pkexec systemctl start aag-otzar-content-mount.service || {
-    notify_error "The content mount could not be prepared."; exit 1;
-  }
+  if ! /usr/bin/systemctl start "$MOUNT_SERVICE"; then
+    notify_error "לא ניתן להכין את דיסק אוצר החכמה."
+    exit 1
+  fi
+  OWNED_MOUNT=1
 fi
-[ -d "$TARGET" ] || { notify_error "The content source is unavailable."; exit 1; }
 
-python3 "$RUNTIME" &
+if [ ! -d "$TARGET" ]; then
+  notify_error "דיסק אוצר החכמה אינו זמין."
+  exit 1
+fi
+
+/usr/bin/python3 "$RUNTIME" &
 session_pid=$!
+
 for _ in $(seq 1 120); do
-  kill -0 "$session_pid" 2>/dev/null || { wait "$session_pid"; exit $?; }
-  if app_running; then raise_outer_window || true; break; fi
-  sleep .2
+  if ! kill -0 "$session_pid" 2>/dev/null; then
+    wait "$session_pid"
+    exit $?
+  fi
+
+  if app_running; then
+    raise_outer_window || true
+    break
+  fi
+
+  sleep 0.2
 done
+
 wait "$session_pid"

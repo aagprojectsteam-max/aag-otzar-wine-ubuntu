@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — 2026-09-22
+
+- Dock launch now owns the full Otzar lifecycle: it starts the Kingston USB Clone and read-only content mount when needed, then tears down only resources it started.
+- Added a lifecycle lock so an immediate relaunch waits for the previous shutdown cleanup instead of colliding with input-sync or USB teardown.
+- Added systemd ExecStop helper templates for content unmount and Kingston gadget teardown.
+- Added a narrowly scoped polkit template allowing the configured desktop user to start/stop only the two Otzar lifecycle services without repeated password prompts.
+- Verified locally: passwordless service start/stop, Kingston gadget cleanup, content mount cleanup, and launcher shell syntax.
+
 ## v3.3.0-burn-in — 2026-09-20
 
 - Production tree relocated under `/mnt/data/WineApps/Otzar-HaHochma`.

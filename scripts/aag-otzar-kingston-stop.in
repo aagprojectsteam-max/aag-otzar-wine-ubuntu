@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+export HOME="@@USER_HOME@@" USER="@@USER@@" LOGNAME="@@USER@@" SUDO_USER="@@USER@@" SUDO_UID="@@UID@@" SUDO_GID="@@GID@@"
+export USB_CLONE_HOME="@@USB_CLONE_HOME@@"
+exec /usr/local/sbin/usbclone stop kingston-empty

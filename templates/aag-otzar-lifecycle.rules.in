@@ -1,0 +1,9 @@
+// Restrict passwordless systemd management to the two Otzar lifecycle units.
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.systemd1.manage-units" && subject.user == "@@USER@@") {
+        var unit = action.lookup("unit");
+        var verb = action.lookup("verb");
+        if ((unit == "aag-usbclone-kingston.service" || unit == "aag-otzar-content-mount.service") &&
+            (verb == "start" || verb == "stop")) return polkit.Result.YES;
+    }
+});

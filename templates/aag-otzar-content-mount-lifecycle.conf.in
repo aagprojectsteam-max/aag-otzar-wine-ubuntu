@@ -1,0 +1,2 @@
+[Service]
+ExecStop=/usr/local/sbin/aag-otzar-content-stop

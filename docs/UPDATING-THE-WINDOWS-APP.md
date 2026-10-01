@@ -60,7 +60,7 @@ The AI should also read `docs/AI-HANDOFF-FULL.md`, `docs/ARCHITECTURE.md`, `docs
 
 - Release line: `v3.3.0-burn-in`.
 - DATA layout: `/mnt/data/WineApps/Otzar-HaHochma/`.
-- Production uses Wine 11.17, scale 1.5, `--in-process-gpu`, software GL, and Chromium compositing.
+- Production uses Wine 11.17, scale 1.5, `--in-process-gpu`, Chromium compositing, and Intel/Mesa hardware GL through nested Xwayland `-glamor gl`. The sandbox exposes `/dev/dri` plus read-only `/sys`; `LIBGL_ALWAYS_SOFTWARE` must not be forced.
 - The Apps launcher owns the Kingston/content lifecycle only when it created the mount: readiness check -> verified read-only loop/mount -> application -> verified unmount/loop detach on exit.
 - Preserve Dock/Apps integration, global fullscreen persistence, language/Backspace repair, popup fixes, touch behavior, and splitter-shimmer fixes.
 - Never update the only accepted production tree in place.

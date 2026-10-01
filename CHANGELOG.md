@@ -1,5 +1,9 @@
 ## Unreleased — 2026-09-22
 
+- Promoted Intel/Mesa hardware acceleration to the local GOLDEN runtime after physical touch A/B testing removed roughly 95% of the user's visible scrolling interruptions.
+- Replaced nested Xwayland `-shm` with `-glamor gl`, exposed `/dev/dri` and read-only `/sys` in the sandbox, and removed forced `LIBGL_ALWAYS_SOFTWARE=1`.
+- Verified the normal production launcher with `Accelerated: yes`, Mesa Intel Arc Graphics, open `renderD128` descriptors, zero `llvmpipe` threads, healthy input bridge, licensing USB readiness, and read-only content.
+- Residual touch-start sensitivity, terminal deceleration smoothness, and desired longer swipe distance remain follow-up work; they are not claimed fixed by this checkpoint.
 - Reworked physical touch scrolling for internal book fullscreen.
 - Added a bounded seven-page warm pool so crossing a page boundary reuses already-rendered page canvases instead of replacing and redrawing the visible page during the gesture.
 - Deferred page-state reconciliation until the visual scroll has settled; one authoritative reconciliation remains at gesture end.

@@ -156,7 +156,7 @@ Start src/touch-focus.sh inside the nested X11 namespace. It reacts to TouchBegi
 Do not replace this with repeated visible Alt-Tab or workspace switching.
 ## Phase 9 — nested Xwayland
 
-Start Xwayland :201 fullscreen at 1920x1200. The final reference command includes -shm, -nolisten tcp, -ac, and -terminate.
+Start Xwayland :201 fullscreen at 1920x1200. The accepted accelerated reference command uses `-glamor gl`, `-nolisten tcp`, `-ac`, and `-terminate`. Do not combine `-shm` with this path: Xwayland reports that `-shm` is incompatible with glamor. The bubblewrap runtime must expose `/dev/dri` and a read-only `/sys` so Mesa/libdrm can resolve the Intel DRM device.
 
 Do not add a nested window manager unless you are intentionally changing the architecture; maximize/minimize behavior was solved at the application/host boundary instead.
 
@@ -318,6 +318,6 @@ Until then, do not optimize for cleanup at the expense of rollback safety.
 - On cold start, verify the user's required licensing USB device is present and authorized before launching Wine. The reference Kingston device is identified by VID:PID 0951:1666; do not hard-code a serial number in public automation.
 - The nested rootful Xwayland surface is tracked by GNOME as `org.freedesktop.Xwayland.desktop`. A user-local override of that desktop ID can supply the application name/icon and make the nested host pinnable in the Dock.
 - Fullscreen settings may be scoped to a settings object/tab. Inject `fullscreen-global-v1.js` so the five `full_screen_*` values are present for each loaded settings object and fullscreen layout is reapplied after a book/tab rebuild.
-- Keep `LIBGL_ALWAYS_SOFTWARE=1` and `--in-process-gpu`, but do not use `--disable-gpu-compositing` in the accepted v3.3 runtime.
+- Keep `--in-process-gpu` and Chromium compositing, but do **not** force `LIBGL_ALWAYS_SOFTWARE=1`. The accepted GOLDEN path uses Intel/Mesa hardware acceleration through Xwayland `-glamor gl`; verify `Accelerated: yes`, an Intel renderer, `/dev/dri/renderD128` open in the application, and zero `llvmpipe` threads.
 - Physical mouse-wheel A/B testing showed zero frames above 20 ms with Chromium compositing enabled versus nine approximately 166 ms stalls with `--disable-gpu-compositing` during the comparison run.
 - For vendor application updates, follow `docs/UPDATING-THE-WINDOWS-APP.md`; never update the only known-good production tree in place.

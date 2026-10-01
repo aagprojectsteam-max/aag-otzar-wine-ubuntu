@@ -77,7 +77,7 @@ def preflight():
 xwayland_log = logs/'xwayland.txt'
 xwayland_log.unlink(missing_ok=True)
 xlog=xwayland_log.open('xb')
-xserver=subprocess.Popen(['/usr/bin/Xwayland',':201','-geometry','1920x1200','-fullscreen','-shm','-nolisten','tcp','-ac','-terminate'],stdout=xlog,stderr=subprocess.STDOUT)
+xserver=subprocess.Popen(['/usr/bin/Xwayland',':201','-geometry','1920x1200','-fullscreen','-glamor','gl','-nolisten','tcp','-ac','-terminate'],stdout=xlog,stderr=subprocess.STDOUT)
 child=None;stream=None;lab=None;run=0;run_dir=None;deadline=time.monotonic()+604800
 try:
     ready=time.monotonic()+15

@@ -1,5 +1,6 @@
 ## Unreleased — 2026-09-22
 
+- Increased accepted touch-fling travel to 2× after physical comparison: 2.5× was excessive, while 2× was accepted as the preferred feel; drag tracking and terminal timing are unchanged.
 - Promoted Intel/Mesa hardware acceleration to the local GOLDEN runtime after physical touch A/B testing removed roughly 95% of the user's visible scrolling interruptions.
 - Replaced nested Xwayland `-shm` with `-glamor gl`, exposed `/dev/dri` and read-only `/sys` in the sandbox, and removed forced `LIBGL_ALWAYS_SOFTWARE=1`.
 - Verified the normal production launcher with `Accelerated: yes`, Mesa Intel Arc Graphics, open `renderD128` descriptors, zero `llvmpipe` threads, healthy input bridge, licensing USB readiness, and read-only content.

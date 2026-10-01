@@ -314,11 +314,15 @@
        * distance = initialVelocity * totalFrames / 2 therefore keeps
        * release velocity continuous at pointer-up.
        */
+      // Physical acceptance: keep the existing release/tail timing,
+      // while allowing one flick to travel twice as far.
+      const flingDistanceMultiplier=2;
+
       const distanceX=
-        vx*frames/2;
+        vx*frames/2*flingDistanceMultiplier;
 
       const distanceY=
-        vy*frames/2;
+        vy*frames/2*flingDistanceMultiplier;
 
       const startLeft=
         st.scroller.scrollLeft;
